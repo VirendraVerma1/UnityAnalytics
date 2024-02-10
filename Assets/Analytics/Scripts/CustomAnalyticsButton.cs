@@ -9,7 +9,11 @@ public class CustomAnalyticsButton : MonoBehaviour
     public string keyName;
     private void Start()
     {
-        attachedButton.onClick.AddListener(SendButtonEvents);
+        attachedButton = GetComponent<Button>();
+        if (attachedButton)
+        {
+            attachedButton.onClick.AddListener(SendButtonEvents);
+        }
     }
 
     public void SendButtonEvents()
@@ -20,6 +24,7 @@ public class CustomAnalyticsButton : MonoBehaviour
         form.AddField("type_id",1);
         form.AddField("event_key",keyName);
         form.AddField("position", positionJson);
+        form.AddField("value", 1);
         StartCoroutine(WebRequestHandler.PostToServer(form, AnalyticsContainer.customButtonAnalyticsURL, (response) => { }));
     }
 }

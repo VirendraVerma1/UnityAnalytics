@@ -1,4 +1,3 @@
-using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -21,15 +20,12 @@ public class BasicAnalyticsManager : MonoBehaviour
         {
             Destroy(gameObject);
         }
-    }
-    
-    void Start()
-    {
+
         if (config != null)
         {
             AnalyticsContainer.UserKey = config.UserKey;
             AnalyticsContainer.AppKey = config.AppKey;
-
+            
             if (PlayerPrefs.HasKey("CustomerId")) 
             {
                 AnalyticsContainer.CustomerId = PlayerPrefs.GetString("CustomerId");
@@ -50,14 +46,17 @@ public class BasicAnalyticsManager : MonoBehaviour
                     SendSessionStartData();
                 }
             }
+            
         }
         else
         {
             Debug.LogError("Analytics configuration is not set!");
             return;
         }
-
-        //check the internet connection 
+    }
+    
+    void Start()
+    {
         StartCoroutine(StartTimer());
         SceneManager.activeSceneChanged += MySceneChanged;
     }
@@ -79,7 +78,6 @@ public class BasicAnalyticsManager : MonoBehaviour
 
     void MySceneChanged(Scene myScene,Scene anotherScene)
     {
-        secCounter = 0;
         SendSessionStartData();
     }
 
@@ -92,7 +90,7 @@ public class BasicAnalyticsManager : MonoBehaviour
         SendSessionStartData();
     }
 
-    private void OnDestroy()
+    private void OnApplicationQuit()
     {
         SendSessionStartData();
     }
@@ -123,11 +121,12 @@ public class BasicAnalyticsManager : MonoBehaviour
         WWWForm form = new WWWForm();
         form.AddField("scene_name",SceneManager.GetActiveScene().name);
         form.AddField("scene_duration",secCounter.ToString());
+        print("Scene Duration"+secCounter.ToString());
         StartCoroutine(WebRequestHandler.PostToServer(form, AnalyticsContainer.baseAalyticsURL, (response) =>
         {
             if (response != null&& response!="")
             {
-                AnalyticsContainer.CustomerId = response;
+                secCounter = 0;
             }
         }));
     }
