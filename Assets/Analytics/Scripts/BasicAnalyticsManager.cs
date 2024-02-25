@@ -43,7 +43,7 @@ public class BasicAnalyticsManager : MonoBehaviour
                 {
                     print("dont have customer id");
                     //send the analytics for punching in
-                    SendSessionStartData();
+                    SendSessionStartData(0);
                 }
             }
             
@@ -78,7 +78,7 @@ public class BasicAnalyticsManager : MonoBehaviour
 
     void MySceneChanged(Scene myScene,Scene anotherScene)
     {
-        SendSessionStartData();
+        SendSessionStartData(0);
     }
 
     private void OnApplicationPause(bool pauseStatus)
@@ -87,12 +87,12 @@ public class BasicAnalyticsManager : MonoBehaviour
             isPause = true;
         else
             isPause = false;
-        SendSessionStartData();
+        SendSessionStartData(0);
     }
 
     private void OnApplicationQuit()
     {
-        SendSessionStartData();
+        SendSessionStartData(1);
     }
 
     void CreateNewUser()
@@ -111,17 +111,18 @@ public class BasicAnalyticsManager : MonoBehaviour
                 
                 AnalyticsContainer.CustomerId = response;
                 PlayerPrefs.SetString("CustomerId",AnalyticsContainer.CustomerId);
-                SendSessionStartData();
+                SendSessionStartData(0);
             }
         }));
     }
 
-    void SendSessionStartData()
+    void SendSessionStartData(int session)
     {
         WWWForm form = new WWWForm();
         form.AddField("scene_name",SceneManager.GetActiveScene().name);
         form.AddField("scene_duration",secCounter.ToString());
-        print("Scene Duration"+secCounter.ToString());
+        form.AddField("started_event",session);
+        print("Scene Duration = "+secCounter.ToString()+"|"+session);
         StartCoroutine(WebRequestHandler.PostToServer(form, AnalyticsContainer.baseAalyticsURL, (response) =>
         {
             if (response != null&& response!="")
