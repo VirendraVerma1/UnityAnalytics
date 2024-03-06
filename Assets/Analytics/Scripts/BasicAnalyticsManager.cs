@@ -29,21 +29,14 @@ public class BasicAnalyticsManager : MonoBehaviour
             if (PlayerPrefs.HasKey("CustomerId")) 
             {
                 AnalyticsContainer.CustomerId = PlayerPrefs.GetString("CustomerId");
+                //SendSessionStartData(0);
             }
             else
             {
-                gameObject.AddComponent<LocationHandler>();
-                StartCoroutine(LocationHandler.instance.StartLocationService());
                 if (AnalyticsContainer.CustomerId == "")
                 {
-                    print("have customer id");
-                    Invoke("CreateNewUser",3);
-                }
-                else
-                {
                     print("dont have customer id");
-                    //send the analytics for punching in
-                    SendSessionStartData(0);
+                    Invoke("CreateNewUser",3);
                 }
             }
             
@@ -87,7 +80,7 @@ public class BasicAnalyticsManager : MonoBehaviour
             isPause = true;
         else
             isPause = false;
-        SendSessionStartData(0);
+        SendSessionStartData(2);
     }
 
     private void OnApplicationQuit()
@@ -99,13 +92,10 @@ public class BasicAnalyticsManager : MonoBehaviour
     {
         WWWForm form = new WWWForm();
         form.AddField("customer_name","Player"+Random.Range(111111,99999999));
-        form.AddField("lat",LocationHandler.instance.GetLocation().x.ToString());
-        form.AddField("lon",LocationHandler.instance.GetLocation().y.ToString());
         form.AddField("device_name",SystemInfo.deviceName);
         form.AddField("app_version",Application.version);
         StartCoroutine(WebRequestHandler.PostToServer(form, AnalyticsContainer.createCustomerURL, (response) =>
         {
-            print(response);
             if (response != null&& response!="")
             {
                 
@@ -122,13 +112,6 @@ public class BasicAnalyticsManager : MonoBehaviour
         form.AddField("scene_name",SceneManager.GetActiveScene().name);
         form.AddField("scene_duration",secCounter.ToString());
         form.AddField("started_event",session);
-        print("Scene Duration = "+secCounter.ToString()+"|"+session);
-        StartCoroutine(WebRequestHandler.PostToServer(form, AnalyticsContainer.baseAalyticsURL, (response) =>
-        {
-            if (response != null&& response!="")
-            {
-                secCounter = 0;
-            }
-        }));
+        WebRequestHandler.PostToServerDirect(form, AnalyticsContainer.baseAalyticsURL);
     }
 }

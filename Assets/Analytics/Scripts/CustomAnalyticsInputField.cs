@@ -24,6 +24,6 @@ public class CustomAnalyticsInputField : MonoBehaviour
         form.AddField("event_key", keyName); 
         form.AddField("position", positionJson);
         form.AddField("value", inputText);
-        StartCoroutine(WebRequestHandler.PostToServer(form, AnalyticsContainer.customButtonAnalyticsURL, (response) => { }));
+        WebRequestHandler.PostToServerDirect(form, AnalyticsContainer.customButtonAnalyticsURL);
     }
 }
