@@ -1,7 +1,9 @@
 using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using System.Net.Http;
 using Random = UnityEngine.Random;
+using System.Collections.Generic;
 
 public class BasicAnalyticsManager : MonoBehaviour
 {
@@ -108,10 +110,15 @@ public class BasicAnalyticsManager : MonoBehaviour
 
     void SendSessionStartData(int session)
     {
-        WWWForm form = new WWWForm();
-        form.AddField("scene_name",SceneManager.GetActiveScene().name);
-        form.AddField("scene_duration",secCounter.ToString());
-        form.AddField("started_event",session);
-        WebRequestHandler.PostToServerDirect(form, AnalyticsContainer.baseAalyticsURL);
+        var values = new Dictionary<string, string>
+        {
+            { "scene_name", SceneManager.GetActiveScene().name },
+            { "scene_duration", secCounter.ToString() },
+            { "started_event", session.ToString() }, // Convert session to string
+        };
+
+        // Assuming WebRequestHandler.PostToServerDirect is correctly implemented to handle the dictionary.
+        WebRequestHandler.PostToServerDirect(values, AnalyticsContainer.baseAalyticsURL);
     }
+
 }

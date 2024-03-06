@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Net.Http;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -50,7 +51,7 @@ public static  class WebRequestHandler
     }
 
     // Modified PostToServerDirect method to enqueue requests if CustomerId is empty
-    public static void PostToServerDirect(WWWForm form, string posturl)
+    public static void PostToServerDirect(Dictionary<string, string> formData, string posturl)
     {
         if (!Application.isEditor)
         {
@@ -58,6 +59,11 @@ public static  class WebRequestHandler
             {
                 // CustomerId is empty, enqueue the request
                 string requestKey = posturl + System.DateTime.Now.Ticks; // Unique key for each request
+                WWWForm form = new WWWForm();
+                foreach (var item in formData)
+                {
+                    form.AddField(item.Key, item.Value.ToString());
+                }
                 UnityWebRequest request = UnityWebRequest.Post(AnalyticsContainer.baseURL + posturl, form);
                 requestQueue.Add(requestKey, request);
             }
@@ -65,7 +71,7 @@ public static  class WebRequestHandler
             {
                 // Add required fields and send the request immediately
                 ProcessQueuedRequests();
-                AddRequiredFieldsAndSend(form, posturl);
+                SendFormData(formData, posturl);
             }
         }
     }
@@ -80,4 +86,36 @@ public static  class WebRequestHandler
         UnityWebRequest request = UnityWebRequest.Post(AnalyticsContainer.baseURL + posturl, form);
         request.SendWebRequest();
     }
+
+    private static readonly HttpClient client = new HttpClient();
+
+    public static void SendFormData(Dictionary<string, string> formData, string posturl)
+    {
+        // Predefined values
+        var values = new Dictionary<string, string>
+        {
+            { "user_id", AnalyticsContainer.CustomerId.ToString() },
+            { "customer_id", AnalyticsContainer.CustomerId.ToString() },
+            { "user_key", AnalyticsContainer.UserKey },
+            { "app_key", AnalyticsContainer.AppKey }
+        };
+
+        // Merge formData into values
+        foreach (var item in formData)
+        {
+            // If the key exists in values, it will be updated; otherwise, it will be added.
+            values[item.Key] = item.Value;
+        }
+
+        // Create FormUrlEncodedContent with the merged values
+        var content = new FormUrlEncodedContent(values);
+
+        // Fire and forget
+        client.PostAsync(AnalyticsContainer.baseURL + posturl, content).ContinueWith((task) =>
+        {
+            // Optional: Log that the request was sent (not the response)
+            Debug.Log("Form data sent.");
+        });
+    }
+
 }

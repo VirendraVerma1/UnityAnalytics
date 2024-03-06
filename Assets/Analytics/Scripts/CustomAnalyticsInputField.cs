@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
@@ -18,12 +19,22 @@ public class CustomAnalyticsInputField : MonoBehaviour
     public void SendInputEvents(string inputText)
     {
         Vector3 position = gameObject.transform.position;
-        string positionJson = $"{{\"x\":{position.x},\"y\":{position.y},\"z\":{position.z}}}";
-        WWWForm form = new WWWForm();
-        form.AddField("type_id", 2);
-        form.AddField("event_key", keyName); 
-        form.AddField("position", positionJson);
-        form.AddField("value", inputText);
-        WebRequestHandler.PostToServerDirect(form, AnalyticsContainer.customButtonAnalyticsURL);
+        Dictionary<string, string> postData = new Dictionary<string, string>();
+
+        // Serialize the position to a dictionary instead of a JSON string
+        Dictionary<string, float> positionDict = new Dictionary<string, float>
+        {
+            {"x", position.x},
+            {"y", position.y},
+            {"z", position.z}
+        };
+
+        // Add fields to the dictionary
+        postData.Add("type_id", "2");
+        postData.Add("event_key", keyName);
+        postData.Add("position", positionDict.ToString()); // Add position as a nested dictionary
+        postData.Add("value", inputText);
+
+        WebRequestHandler.PostToServerDirect(postData, AnalyticsContainer.customButtonAnalyticsURL);
     }
 }

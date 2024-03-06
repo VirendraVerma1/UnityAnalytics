@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class CustomManulEvent : MonoBehaviour
@@ -8,13 +9,24 @@ public class CustomManulEvent : MonoBehaviour
     public void SendButtonEvents()
     {
         Vector3 position = gameObject.transform.position;
-       
-        WWWForm form = new WWWForm();
-        form.AddField("type_id",1);
-        form.AddField("event_key",keyName);
-        if(trackPosition)
-            form.AddField("position", $"{{\"x\":{position.x},\"y\":{position.y},\"z\":{position.z}}}");
-        form.AddField("value", 1);
-        WebRequestHandler.PostToServerDirect(form, AnalyticsContainer.customButtonAnalyticsURL);
+
+        Dictionary<string, string> formData = new Dictionary<string, string>();
+
+        formData.Add("type_id", "1");
+        formData.Add("event_key", keyName);
+
+        if (trackPosition)
+        {
+            var positionData = new Dictionary<string, float>
+            {
+                {"x", position.x},
+                {"y", position.y},
+                {"z", position.z}
+            };
+            formData.Add("position", JsonUtility.ToJson(positionData));
+        }
+
+        formData.Add("value", "1");
+        WebRequestHandler.PostToServerDirect(formData, AnalyticsContainer.customButtonAnalyticsURL);
     }
 }
