@@ -15,6 +15,11 @@ public class CustomAnalyticsButton : MonoBehaviour
         {
             attachedButton.onClick.AddListener(SendButtonEvents);
         }
+
+        if (keyName == "")
+        {
+            keyName = gameObject.name;
+        }
     }
 
     public void SendButtonEvents()
