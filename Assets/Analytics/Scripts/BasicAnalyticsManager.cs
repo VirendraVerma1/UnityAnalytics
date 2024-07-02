@@ -38,7 +38,7 @@ public class BasicAnalyticsManager : MonoBehaviour
                 if (AnalyticsContainer.CustomerId == "")
                 {
                     print("dont have customer id");
-                    Invoke("CreateNewUser",3);
+                    CreateNewUser();
                 }
             }
             
@@ -100,7 +100,6 @@ public class BasicAnalyticsManager : MonoBehaviour
         {
             if (response != null&& response!="")
             {
-                
                 AnalyticsContainer.CustomerId = response;
                 PlayerPrefs.SetString("CustomerId",AnalyticsContainer.CustomerId);
                 SendSessionStartData(0);
